@@ -13,7 +13,7 @@ use caesium::{
 };
 
 const ABI_VERSION: u32 = 1;
-const NATIVE_VERSION: &[u8] = b"0.1.0+libcaesium-0.20.3\0";
+const NATIVE_VERSION: &[u8] = b"1.0.0+libcaesium-0.20.3\0";
 
 const ERROR_INVALID_ARGUMENT: u32 = 20_001;
 const ERROR_INVALID_UTF8: u32 = 20_002;
@@ -565,7 +565,7 @@ mod tests {
     fn abi_and_version_are_stable() {
         assert_eq!(fc_abi_version(), 1);
         let value = unsafe { CStr::from_ptr(fc_native_version()) };
-        assert_eq!(value.to_str().unwrap(), "0.1.0+libcaesium-0.20.3");
+        assert_eq!(value.to_str().unwrap(), "1.0.0+libcaesium-0.20.3");
     }
 
     #[test]

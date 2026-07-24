@@ -189,7 +189,7 @@ jobs:
       - run: dart pub publish --dry-run
       - name: Create and enforce package size limits
         run: |
-          archive="$RUNNER_TEMP/flutter_caesium_ffi-0.1.0.tar.gz"
+          archive="$RUNNER_TEMP/flutter_caesium_ffi-1.0.0.tar.gz"
           tar --exclude-vcs --exclude-from=.pubignore -czf "$archive" .
           compressed=$(stat -c %s "$archive")
           unpacked=$(tar -tzvf "$archive" | awk '{sum += $3} END {print sum}')
@@ -198,6 +198,6 @@ jobs:
           cp "$archive" .
       - uses: actions/upload-artifact@v4
         with:
-          name: flutter_caesium_ffi-0.1.0-package
-          path: flutter_caesium_ffi-0.1.0.tar.gz
+          name: flutter_caesium_ffi-1.0.0-package
+          path: flutter_caesium_ffi-1.0.0.tar.gz
           if-no-files-found: error

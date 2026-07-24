@@ -1,4 +1,4 @@
-## Unreleased
+## 1.0.0
 
 - Added Flutter web support through bundled `libcaesium-wasm` assets.
 - Added lazy browser initialization and in-memory compression, target-size, and
