@@ -1,0 +1,19 @@
+[package]
+name = "flutter_caesium_ffi_native"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+publish = false
+
+[lib]
+name = "flutter_caesium_ffi"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+libcaesium = { version = "=0.20.3" }
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = 3
+strip = "symbols"

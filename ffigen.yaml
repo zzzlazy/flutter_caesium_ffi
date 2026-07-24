@@ -1,0 +1,21 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+name: FlutterCaesiumFfiBindings
+description: |
+  Private bindings for the stable flutter_caesium_ffi C ABI.
+
+  Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+output: 'lib/flutter_caesium_ffi_bindings_generated.dart'
+headers:
+  entry-points:
+    - 'src/flutter_caesium_ffi.h'
+  include-directives:
+    - 'src/flutter_caesium_ffi.h'
+preamble: |
+  // Generated file. Do not edit.
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+  // ignore_for_file: public_member_api_docs
+comments:
+  style: doxygen
+  length: brief
