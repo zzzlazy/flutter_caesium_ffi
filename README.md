@@ -1,16 +1,34 @@
 # flutter_caesium_ffi
 
-Fast image compression for Flutter, backed by
+[![pub package](https://img.shields.io/pub/v/flutter_caesium_ffi.svg)](https://pub.dev/packages/flutter_caesium_ffi)
+[![pub points](https://img.shields.io/pub/points/flutter_caesium_ffi)](https://pub.dev/packages/flutter_caesium_ffi/score)
+[![CI](https://github.com/zzzlazy/flutter_caesium_ffi/actions/workflows/ci.yml/badge.svg)](https://github.com/zzzlazy/flutter_caesium_ffi/actions/workflows/ci.yml)
+[![license: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
+
+Fast, high-quality, cross-platform image compression for Flutter. Compress,
+resize, convert, or target a file size for JPEG, PNG, WebP, GIF, and TIFF using
+one Dart API across Android, iOS, macOS, Windows, Linux, and web.
+
+Native platforms use
 [`libcaesium` 0.20.3](https://github.com/Lymphatus/libcaesium) through a stable
-C ABI and Dart FFI on native platforms, and
-[`libcaesium-wasm` 0.5.0](https://github.com/zzzlazy/libcaesium-wasm) in
-browsers.
+C ABI and Dart FFI. Browsers use
+[`libcaesium-wasm` 0.5.0](https://github.com/zzzlazy/libcaesium-wasm).
 
 The package supports JPEG, PNG, WebP, GIF, and TIFF on Android, iOS, macOS,
 Windows, and Linux. Web supports in-memory JPEG, PNG, and WebP compression and
 conversion.
 Native libraries and web assets are bundled, so consuming applications do not
 need Rust, Cargo, npm, a C compiler, or manual script tags.
+
+## Features
+
+- High-quality image compression powered by the Caesium/libcaesium codecs
+- JPEG, PNG, WebP, GIF, and TIFF compression on native platforms
+- Image resize and format conversion with metadata controls
+- Best-effort target file size compression
+- Memory and file path APIs running outside the Flutter UI isolate
+- Bundled native binaries and WebAssembly: no consumer-side toolchain setup
+- One plugin for Flutter mobile, desktop, and web
 
 > **License notice:** this package and its bundled native code are licensed
 > under AGPL-3.0-or-later. Applications that distribute or provide network
@@ -31,7 +49,20 @@ need Rust, Cargo, npm, a C compiler, or manual script tags.
 
 ## Installation
 
-Until the first pub.dev release, depend directly on the repository:
+Install the published package:
+
+```sh
+flutter pub add flutter_caesium_ffi
+```
+
+Or add it manually:
+
+```yaml
+dependencies:
+  flutter_caesium_ffi: ^1.0.1
+```
+
+To track unreleased changes from the default branch instead:
 
 ```yaml
 dependencies:
@@ -108,6 +139,64 @@ candidate when the exact target cannot be reached.
 | Windows | x64 MSVC |
 | Linux | x86_64, glibc 2.31+ |
 | Web | WebAssembly, JPEG/PNG/WebP |
+
+## JPEG compression benchmark
+
+The following results use one already-compressed 3840 × 1725 JPEG landscape
+photo. Outputs were matched as closely as practical by file size and, except
+where noted, by dimensions. SSIM was calculated after decoding and restoring
+resized outputs to the source dimensions, so resize loss is included. Higher is
+better.
+
+| Comparison | Output dimensions | Approx. size | Caesium SSIM | Other SSIM | Result |
+| --- | ---: | ---: | ---: | ---: | --- |
+| iOS `UIImage.jpegData` | 3840 × 1725 | 0.55 MiB | **0.9243** | 0.9082 | Caesium better |
+| iOS `UIImage.jpegData` | 3840 × 1725 | 0.97 MiB | **0.9639** | 0.9493 | Caesium better |
+| iOS `UIImage.jpegData` | 3840 × 1725 | 1.46 MiB | 0.9944 | 0.9941 | Essentially tied |
+| [TinyImage](https://tinypng.com/) (closed-source) | 3840 × 1725 | 0.66 MiB | **0.9372** | 0.9314 | Caesium slightly better |
+| [Luban 2.0.1](https://github.com/Curzibn/Luban) default | 3204 × 1440 | 0.14 MiB | **0.8055** | 0.6926 | Caesium better |
+| [Tiny 1.1.0](https://github.com/Sunzxyong/Tiny) default | 1280 × 575 | 0.10 MiB | **0.7763** | 0.7541 | Caesium better |
+
+### Visual comparisons
+
+The crops below are shown at equal or near-equal file sizes. The Luban and Tiny
+outputs are normalized to the source dimensions so their resize loss remains
+visible.
+
+#### Caesium vs iOS
+
+The top row compares approximately 0.55 MiB outputs; the bottom row compares
+approximately 0.97 MiB outputs.
+
+![Original, Caesium, and iOS JPEG detail crops at approximately 0.55 and 0.97 MiB](doc/benchmarks/ios_same_size.webp)
+
+#### TinyImage vs Caesium vs iOS
+
+Left to right: original, [TinyImage](https://tinypng.com/) at 671 KiB, Caesium
+at 660 KiB, and iOS at 667 KiB.
+
+![Original, TinyImage, Caesium, and iOS JPEG detail crops at approximately 0.66 MiB](doc/benchmarks/tinyimage_same_size.webp)
+
+#### Luban vs Caesium vs iOS
+
+![Original, Luban, Caesium, and iOS JPEG detail crops at approximately 0.14 MiB](doc/benchmarks/luban_same_size.webp)
+
+#### Tiny vs Caesium vs iOS
+
+![Tiny, Caesium, and iOS JPEG detail crops at approximately 0.10 MiB](doc/benchmarks/tiny_same_size.webp)
+
+For the TinyImage comparison, SSIMULACRA2 was 62.01 for Caesium and 61.32 for
+TinyImage. The Luban and Tiny rows compare their default strategy with Caesium
+target-size output at the same dimensions. Luban chose JPEG Q5 for this
+panoramic image, while Tiny resized the long edge to 1280 pixels.
+
+These are single-image results, not a claim that one encoder wins for every
+photo. The source was the 3840-pixel version of
+[Fronalpstock big.jpg](https://commons.wikimedia.org/wiki/File:Fronalpstock_big.jpg);
+Caesium was tested with `caesiumclt` 1.4.0, iOS with
+`UIImage.jpegData(compressionQuality:)` on an iOS 26 Simulator, and quality
+with FFmpeg SSIM/PSNR plus SSIMULACRA2 where available. Human evaluation and a
+larger corpus should be used for production codec decisions.
 
 ## Building native libraries
 

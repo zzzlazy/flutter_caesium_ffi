@@ -1,3 +1,10 @@
+## Unreleased
+
+- Added documented JPEG compression metrics and visual crops for iOS, Luban,
+  Tiny, and TinyImage comparisons.
+- Improved package description, topics, installation guidance, and
+  discoverability metadata.
+
 ## 1.0.1
 
 - Fixed Web interop analysis on current Dart SDKs.
