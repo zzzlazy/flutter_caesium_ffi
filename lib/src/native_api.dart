@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import '../flutter_caesium_ffi_bindings_generated.dart';
+import 'flutter_caesium_ffi_bindings_generated.dart';
 import 'models.dart';
 
 const int _expectedAbiVersion = 1;

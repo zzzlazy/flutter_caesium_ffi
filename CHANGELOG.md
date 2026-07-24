@@ -1,3 +1,9 @@
+## 1.0.1
+
+- Fixed Web interop analysis on current Dart SDKs.
+- Hid platform-specific implementation libraries from the public API surface so
+  pub.dev can detect all supported Flutter platforms.
+
 ## 1.0.0
 
 - Added Flutter web support through bundled `libcaesium-wasm` assets.

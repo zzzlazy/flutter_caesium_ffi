@@ -1,5 +1,5 @@
 PODS:
-  - flutter_caesium_ffi (1.0.0):
+  - flutter_caesium_ffi (1.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
 
@@ -14,7 +14,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
 
 SPEC CHECKSUMS:
-  flutter_caesium_ffi: 3c059867d399d34a895c21172e645b1cf1cedc32
+  flutter_caesium_ffi: 11b029d47900596a2ee1783d36e88235e45b6b02
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
 
 PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367

@@ -151,10 +151,26 @@ Future<_CaesiumModule> _loadModule() async {
   final Uri baseUri = Uri.parse(_documentBaseUri);
   final String moduleUrl = baseUri.resolve(_moduleAsset).toString();
   final String wasmUrl = baseUri.resolve(_wasmAsset).toString();
-  final JSObject namespace = await importModule(moduleUrl).toDart;
+  final JSObject namespace = await _importModule(moduleUrl).toDart;
   final _CaesiumModule module = _CaesiumModule._(namespace);
   await module.initialize(wasmUrl).toDart;
   return module;
+}
+
+JSPromise<JSObject> _importModule(String moduleUrl) {
+  try {
+    return Function.apply(
+      importModule,
+      <Object?>[moduleUrl.toJS],
+    ) as JSPromise<JSObject>;
+  } on TypeError {
+    // Dart 3.4's importModule accepts a Dart String, while current Dart SDKs
+    // accept a JSAny module specifier.
+    return Function.apply(
+      importModule,
+      <Object?>[moduleUrl],
+    ) as JSPromise<JSObject>;
+  }
 }
 
 _CompressionOptions _toWebOptions(CaesiumOptions options) {

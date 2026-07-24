@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_caesium_ffi (1.0.0):
+  - flutter_caesium_ffi (1.0.1):
     - Flutter
 
 DEPENDENCIES:
@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_caesium_ffi: c589258f43939ca34c8d8ee05359ffdc56965fd9
+  flutter_caesium_ffi: 5292f24788c5c821a8174045bec28ffd74164922
 
 PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
 
