@@ -126,7 +126,13 @@ FLUTTER_CAESIUM_LINUX_GLIBC=2.31 \
   dart run tool/build_native.dart --platform linux
 ```
 
-GitHub Actions builds and strips each platform binary, verifies example
+The regular GitHub Actions workflow runs Dart formatting, analysis, tests, and
+bundled-binary checksum verification for every push and pull request. The
+separate native workflow only runs when Rust, C ABI, bindings, native packaging,
+or prebuilt-binary files change. Version tags and manual dispatches always run
+the complete native workflow.
+
+The native workflow builds and strips each platform binary, verifies example
 application linking from the checked-in binaries before rebuilding them,
 combines a complete package artifact, and runs `dart pub publish --dry-run`.
 It does not publish to pub.dev. Checksums for the checked-in binaries are in
