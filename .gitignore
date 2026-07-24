@@ -28,7 +28,3 @@ migrate_working_dir/
 .dart_tool/
 build/
 /rust/target/
-/native/**/*.so
-/native/**/*.dll
-/ios/Frameworks/*.xcframework/
-/macos/Frameworks/*.xcframework/

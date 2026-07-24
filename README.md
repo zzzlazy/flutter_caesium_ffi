@@ -5,13 +5,9 @@ Fast, isolate-friendly image compression for Flutter, backed by
 C ABI and Dart FFI.
 
 The package supports JPEG, PNG, WebP, GIF, and TIFF on Android, iOS, macOS,
-Windows, and Linux. Web is not supported. Published packages include the native
-libraries, so consuming applications do not need Rust or a C toolchain.
-
-The source branch intentionally omits generated binaries. Until a pub.dev
-release exists, use the complete package artifact from a successful GitHub
-Actions run; a raw Git dependency is intended for contributors who rebuild the
-native libraries.
+Windows, and Linux. Web is not supported. The repository and release package
+both include the native libraries, so consuming applications do not need Rust,
+Cargo, a C compiler, or a native build toolchain.
 
 > **License notice:** this package and its bundled native code are licensed
 > under AGPL-3.0-or-later. Applications that distribute or provide network
@@ -28,6 +24,22 @@ native libraries.
 - macOS 10.14 or newer
 - Linux x86_64 with glibc 2.31 or newer
 - Windows x64
+
+## Installation
+
+Until the first pub.dev release, depend directly on the repository:
+
+```yaml
+dependencies:
+  flutter_caesium_ffi:
+    git:
+      url: https://github.com/zzzlazy/flutter_caesium_ffi.git
+      ref: main
+```
+
+Then run `flutter pub get` and build the application normally. The required
+`.so`, `.dll`, and XCFramework binaries are already bundled. Rust is only
+needed when modifying or rebuilding the native wrapper.
 
 ## Usage
 
@@ -115,8 +127,10 @@ FLUTTER_CAESIUM_LINUX_GLIBC=2.31 \
 ```
 
 GitHub Actions builds and strips each platform binary, verifies example
-application linking, combines a complete package artifact, and runs
-`dart pub publish --dry-run`. It does not publish to pub.dev.
+application linking from the checked-in binaries before rebuilding them,
+combines a complete package artifact, and runs `dart pub publish --dry-run`.
+It does not publish to pub.dev. Checksums for the checked-in binaries are in
+[`NATIVE_CHECKSUMS.sha256`](NATIVE_CHECKSUMS.sha256).
 
 ## Development
 
