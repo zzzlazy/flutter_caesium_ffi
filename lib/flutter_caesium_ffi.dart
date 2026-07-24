@@ -3,16 +3,19 @@ library flutter_caesium_ffi;
 import 'dart:typed_data';
 
 import 'src/models.dart';
-import 'src/native_api.dart';
+import 'src/platform_api.dart';
 
 export 'src/models.dart';
 
 /// High-performance image compression backed by libcaesium.
 abstract final class FlutterCaesiumFfi {
-  /// The bundled wrapper and libcaesium version.
+  /// The bundled native or WebAssembly wrapper and libcaesium version.
   static String get nativeVersion => nativeVersionSync();
 
   /// Compresses an encoded image without changing its format.
+  ///
+  /// Web supports JPEG, PNG, and WebP through the bundled libcaesium WASM
+  /// module.
   static Future<CaesiumMemoryResult> compress(
     Uint8List input, {
     CaesiumOptions options = const CaesiumOptions(),
@@ -41,6 +44,8 @@ abstract final class FlutterCaesiumFfi {
   }
 
   /// Converts an encoded image to [format].
+  ///
+  /// Web supports JPEG, PNG, and WebP output.
   static Future<CaesiumMemoryResult> convert(
     Uint8List input, {
     required CaesiumFormat format,
@@ -57,6 +62,7 @@ abstract final class FlutterCaesiumFfi {
   /// Compresses [inputPath] into a new file at [outputPath].
   ///
   /// Existing output files are never overwritten.
+  /// File operations are unavailable on web; use [compress] with bytes there.
   static Future<CaesiumFileResult> compressFile(
     String inputPath,
     String outputPath, {
@@ -73,6 +79,8 @@ abstract final class FlutterCaesiumFfi {
   /// Compresses [inputPath] to at most [maxOutputBytes] where possible.
   ///
   /// Existing output files are never overwritten.
+  /// File operations are unavailable on web; use [compressToSize] with bytes
+  /// there.
   static Future<CaesiumFileResult> compressFileToSize(
     String inputPath,
     String outputPath, {
@@ -93,6 +101,7 @@ abstract final class FlutterCaesiumFfi {
   /// Converts [inputPath] into [format] at [outputPath].
   ///
   /// Existing output files are never overwritten.
+  /// File operations are unavailable on web.
   static Future<CaesiumFileResult> convertFile(
     String inputPath,
     String outputPath, {

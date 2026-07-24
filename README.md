@@ -1,13 +1,16 @@
 # flutter_caesium_ffi
 
-Fast, isolate-friendly image compression for Flutter, backed by
+Fast image compression for Flutter, backed by
 [`libcaesium` 0.20.3](https://github.com/Lymphatus/libcaesium) through a stable
-C ABI and Dart FFI.
+C ABI and Dart FFI on native platforms, and
+[`libcaesium-wasm` 0.5.0](https://github.com/zzzlazy/libcaesium-wasm) in
+browsers.
 
 The package supports JPEG, PNG, WebP, GIF, and TIFF on Android, iOS, macOS,
-Windows, and Linux. Web is not supported. The repository and release package
-both include the native libraries, so consuming applications do not need Rust,
-Cargo, a C compiler, or a native build toolchain.
+Windows, and Linux. Web supports in-memory JPEG, PNG, and WebP compression and
+conversion.
+Native libraries and web assets are bundled, so consuming applications do not
+need Rust, Cargo, npm, a C compiler, or manual script tags.
 
 > **License notice:** this package and its bundled native code are licensed
 > under AGPL-3.0-or-later. Applications that distribute or provide network
@@ -19,6 +22,7 @@ Cargo, a C compiler, or a native build toolchain.
 
 - Flutter 3.22 or newer
 - Dart 3.4 or newer
+- A browser with WebAssembly and JavaScript module support
 - Android 5.0 / API 21 or newer
 - iOS 12.0 or newer
 - macOS 10.14 or newer
@@ -37,19 +41,19 @@ dependencies:
       ref: main
 ```
 
-Then run `flutter pub get` and build the application normally. The required
-`.so`, `.dll`, and XCFramework binaries are already bundled. Rust is only
-needed when modifying or rebuilding the native wrapper.
+Then run `flutter pub get` and build the application normally. Native binaries
+and the WebAssembly module are already bundled. Rust is only needed when
+modifying or rebuilding the wrappers.
 
 ## Usage
 
+The memory API works on native platforms and web:
+
 ```dart
-import 'dart:io';
 import 'package:flutter_caesium_ffi/flutter_caesium_ffi.dart';
 
-final result = await FlutterCaesiumFfi.compressFile(
-  '/tmp/input.jpg',
-  '/tmp/output.jpg',
+final result = await FlutterCaesiumFfi.compress(
+  encodedImageBytes,
   options: const CaesiumOptions(
     keepMetadata: false,
     jpeg: JpegOptions(quality: 75, progressive: true),
@@ -59,20 +63,25 @@ final result = await FlutterCaesiumFfi.compressFile(
 
 print('${result.inputSize} -> ${result.outputSize} bytes');
 print('native: ${FlutterCaesiumFfi.nativeVersion}');
-
-final converted = await FlutterCaesiumFfi.convert(
-  await File('/tmp/input.png').readAsBytes(),
-  format: CaesiumFormat.webp,
-  options: const CaesiumOptions(webp: WebpOptions(quality: 82)),
-);
-await File('/tmp/output.webp').writeAsBytes(converted.bytes);
 ```
 
 The public operations are `compress`, `compressFile`, `compressToSize`,
 `compressFileToSize`, `convert`, `convertFile`, and `nativeVersion`.
 
-All image work runs on a background isolate. Memory input and output cross
-isolate boundaries with `TransferableTypedData`.
+Native image work runs on a background isolate. On web, the WASM module is
+loaded lazily on the first call and currently runs on the browser main thread.
+
+## Platform API support
+
+| Operation | Native | Web |
+| --- | --- | --- |
+| `compress` | JPEG, PNG, WebP, GIF, TIFF | JPEG, PNG, WebP |
+| `compressToSize` | Yes | Yes |
+| `convert` | Yes | JPEG, PNG, WebP output |
+| File path APIs | Yes | Not available in browsers |
+
+On web, `jpeg.preserveIcc` is not available in the older libcaesium version used
+by the WASM build. Web resize dimensions are limited to 999999.
 
 ## Options and behavior
 
@@ -98,6 +107,7 @@ candidate when the exact target cannot be reached.
 | macOS | arm64/x86_64 universal |
 | Windows | x64 MSVC |
 | Linux | x86_64, glibc 2.31+ |
+| Web | WebAssembly, JPEG/PNG/WebP |
 
 ## Building native libraries
 
@@ -144,6 +154,7 @@ It does not publish to pub.dev. Checksums for the checked-in binaries are in
 flutter pub get
 flutter analyze
 flutter test
+flutter build web --release
 cargo +1.92.0 test --manifest-path rust/Cargo.toml
 ```
 

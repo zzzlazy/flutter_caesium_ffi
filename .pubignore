@@ -15,5 +15,8 @@ rust/target/
 example/android/gradle/wrapper/gradle-wrapper.jar
 example/android/gradlew
 example/android/gradlew.bat
+example/assets/comparison/
+example/integration_test/
+example/test_driver/
 *.iml
 *.log

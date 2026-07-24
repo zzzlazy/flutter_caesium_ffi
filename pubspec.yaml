@@ -1,5 +1,5 @@
 name: flutter_caesium_ffi
-description: Fast cross-platform image compression powered by libcaesium through Dart FFI.
+description: Fast cross-platform image compression powered by libcaesium through Dart FFI and WebAssembly.
 version: 0.1.0
 homepage: https://github.com/zzzlazy/flutter_caesium_ffi
 repository: https://github.com/zzzlazy/flutter_caesium_ffi
@@ -12,6 +12,8 @@ environment:
 dependencies:
   ffi: ^2.1.2
   flutter:
+    sdk: flutter
+  flutter_web_plugins:
     sdk: flutter
 
 dev_dependencies:
@@ -31,5 +33,11 @@ flutter:
         ffiPlugin: true
       macos:
         ffiPlugin: true
+      web:
+        pluginClass: FlutterCaesiumFfiWeb
+        fileName: flutter_caesium_ffi_web.dart
       windows:
         ffiPlugin: true
+  assets:
+    - web/libcaesium_wasm/index.js
+    - web/libcaesium_wasm/libcaesium_wasm.wasm

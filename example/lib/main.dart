@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_caesium_ffi/flutter_caesium_ffi.dart';
 
@@ -24,7 +24,9 @@ class _ExampleAppState extends State<ExampleApp> {
   Future<void> _compressSample() async {
     setState(() {
       _running = true;
-      _status = 'Compressing on a worker isolate…';
+      _status = kIsWeb
+          ? 'Compressing with WebAssembly…'
+          : 'Compressing on a worker isolate…';
     });
     try {
       final Uint8List input = base64Decode(_samplePng);
@@ -34,9 +36,24 @@ class _ExampleAppState extends State<ExampleApp> {
           png: PngOptions(optimize: true),
         ),
       );
+      final CaesiumMemoryResult targeted =
+          await FlutterCaesiumFfi.compressToSize(
+        input,
+        maxOutputBytes: 128,
+        returnSmallest: true,
+      );
+      final CaesiumMemoryResult converted = await FlutterCaesiumFfi.convert(
+        input,
+        format: CaesiumFormat.webp,
+      );
+      if (!_isWebp(converted.bytes)) {
+        throw StateError('Conversion did not produce a WebP image.');
+      }
       setState(() {
         _status = '${FlutterCaesiumFfi.nativeVersion}\n'
-            '${result.inputSize} → ${result.outputSize} bytes';
+            'compress: ${result.inputSize} → ${result.outputSize} bytes\n'
+            'target-size: ${targeted.outputSize} bytes\n'
+            'convert to WebP: ${converted.outputSize} bytes';
       });
     } on Object catch (error) {
       setState(() => _status = error.toString());
@@ -45,6 +62,18 @@ class _ExampleAppState extends State<ExampleApp> {
         setState(() => _running = false);
       }
     }
+  }
+
+  bool _isWebp(Uint8List bytes) {
+    return bytes.length >= 12 &&
+        bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x57 &&
+        bytes[9] == 0x45 &&
+        bytes[10] == 0x42 &&
+        bytes[11] == 0x50;
   }
 
   @override

@@ -1,5 +1,22 @@
 # Third-party notices
 
+## WebAssembly bundle
+
+The files under `web/libcaesium_wasm` are based on
+[`zzzlazy/libcaesium-wasm`](https://github.com/zzzlazy/libcaesium-wasm)
+0.5.0 at commit `b1089e36ceea970fa15a85e8994dd786dceb9c0f`, forked from
+[`Lymphatus/libcaesium-wasm`](https://github.com/Lymphatus/libcaesium-wasm).
+The wrapper is MIT licensed; its license text is included at
+`licenses/libcaesium-wasm-MIT.txt`.
+
+The fork accepts an explicit WASM asset URL, copies output before releasing
+Rust-owned memory, frees temporary allocations, retains the documented GIF
+quality range, forwards target-size behavior, and exposes JPEG/PNG/WebP
+conversion. The WASM binary embeds `libcaesium` 0.18.0 with JPEG, PNG, and WebP
+features.
+
+## Native bundles
+
 `flutter_caesium_ffi` links `libcaesium` 0.20.3 and its Rust/native
 dependency graph into the distributed binaries. The exact, reproducible
 dependency set is pinned in [`rust/Cargo.lock`](rust/Cargo.lock).
