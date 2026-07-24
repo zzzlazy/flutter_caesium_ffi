@@ -188,15 +188,28 @@ Future<void> _buildLinux(Directory root) async {
   if (glibcVersion == null || glibcVersion.isEmpty) {
     await _cargoBuild(root, 'x86_64-unknown-linux-gnu');
   } else {
-    await _run('cargo', <String>[
-      '+1.92.0',
-      'zigbuild',
-      '--release',
-      '--manifest-path',
-      _join(root.path, 'rust', 'Cargo.toml'),
-      '--target',
-      'x86_64-unknown-linux-gnu.$glibcVersion',
-    ]);
+    await _run(
+      'cargo',
+      <String>[
+        '+1.92.0',
+        'zigbuild',
+        '--release',
+        '--manifest-path',
+        _join(root.path, 'rust', 'Cargo.toml'),
+        '--target',
+        'x86_64-unknown-linux-gnu.$glibcVersion',
+      ],
+      environment: const <String, String>{
+        // Zig 0.13's Clang rejects libdeflate's AVX-512 target functions with
+        // an erroneous "without evex512 enabled changes the ABI" diagnostic.
+        // Keep the portable and AVX2 paths while omitting only those optional
+        // dispatch implementations from the glibc-baseline build.
+        'CFLAGS_x86_64_unknown_linux_gnu':
+            '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_VPCLMULQDQ '
+                '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_AVX512VNNI '
+                '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_AVX_VNNI',
+      },
+    );
   }
   final File source = File(
     _join(
