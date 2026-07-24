@@ -3,40 +3,11 @@ name: Native CI
 on:
   push:
     branches: [main]
-    tags: ['v*']
     paths:
       - 'rust/**'
-      - 'src/**'
-      - 'tool/build_native.dart'
-      - 'ffigen.yaml'
-      - 'lib/flutter_caesium_ffi_bindings_generated.dart'
-      - 'test/native_integration_test.dart'
-      - 'android/**'
-      - 'ios/**'
-      - 'macos/**'
-      - 'linux/**'
-      - 'windows/**'
-      - 'native/**'
-      - 'NATIVE_CHECKSUMS.sha256'
-      - 'pubspec.yaml'
-      - '.github/workflows/native.yml'
   pull_request:
     paths:
       - 'rust/**'
-      - 'src/**'
-      - 'tool/build_native.dart'
-      - 'ffigen.yaml'
-      - 'lib/flutter_caesium_ffi_bindings_generated.dart'
-      - 'test/native_integration_test.dart'
-      - 'android/**'
-      - 'ios/**'
-      - 'macos/**'
-      - 'linux/**'
-      - 'windows/**'
-      - 'native/**'
-      - 'NATIVE_CHECKSUMS.sha256'
-      - 'pubspec.yaml'
-      - '.github/workflows/native.yml'
   workflow_dispatch:
 
 permissions:

@@ -4,8 +4,6 @@
 - Added lazy browser initialization and in-memory compression, target-size, and
   conversion APIs for JPEG, PNG, and WebP.
 - Added a web example target and release-build coverage.
-- Added a GitHub Actions parity workflow that produces and compares JPEG output
-  on Linux, Windows, macOS, iOS, Android, and Web.
 
 ## 0.1.0
 
