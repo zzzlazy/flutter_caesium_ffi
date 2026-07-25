@@ -193,8 +193,9 @@ jobs:
         shell: pwsh
         run: |
           $exports = dumpbin /EXPORTS native\windows\x64\flutter_caesium_ffi.dll
-          if ($exports -notmatch "fc_abi_version") { throw "Missing fc_abi_version" }
-          if ($exports -notmatch "fc_compress_memory") { throw "Missing fc_compress_memory" }
+          $exportText = $exports -join "`n"
+          if ($exportText -notmatch "fc_abi_version") { throw "Missing fc_abi_version" }
+          if ($exportText -notmatch "fc_compress_memory") { throw "Missing fc_compress_memory" }
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.RUST_VERSION }}
