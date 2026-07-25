@@ -1,5 +1,10 @@
 ## Unreleased
 
+## 2.0.1
+
+- Updated `code_assets` and the `hooks` compatibility range to their latest
+  stable release series.
+
 ## 2.0.0
 
 - **Breaking:** Raised the minimum versions to Flutter 3.38.10 and Dart 3.10.

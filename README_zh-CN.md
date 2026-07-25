@@ -59,7 +59,7 @@ flutter pub add flutter_caesium_ffi
 
 ```yaml
 dependencies:
-  flutter_caesium_ffi: ^2.0.0
+  flutter_caesium_ffi: ^2.0.1
 ```
 
 如需跟踪默认分支上的未发布改动：
