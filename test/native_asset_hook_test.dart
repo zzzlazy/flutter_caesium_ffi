@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks/hooks.dart';
 
 import '../hook/build.dart' as build_hook;
-import '../hook/src/native_asset.dart';
 
 void main() {
   final Uri packageRoot = Directory.current.uri;
@@ -79,7 +78,7 @@ void main() {
 
     for (final entry in cases) {
       expect(
-        prebuiltNativeAssetPath(
+        build_hook.prebuiltNativeAssetPath(
           targetOS: entry.os,
           targetArchitecture: entry.architecture,
           iOSSdk: entry.iOSSdk,
@@ -88,7 +87,7 @@ void main() {
       );
       expect(
         File.fromUri(
-          resolvePrebuiltNativeAsset(
+          build_hook.resolvePrebuiltNativeAsset(
             packageRoot: packageRoot,
             targetOS: entry.os,
             targetArchitecture: entry.architecture,
@@ -103,14 +102,14 @@ void main() {
 
   test('rejects unsupported targets', () {
     expect(
-      () => prebuiltNativeAssetPath(
+      () => build_hook.prebuiltNativeAssetPath(
         targetOS: OS.linux,
         targetArchitecture: Architecture.arm64,
       ),
       throwsUnsupportedError,
     );
     expect(
-      () => prebuiltNativeAssetPath(
+      () => build_hook.prebuiltNativeAssetPath(
         targetOS: OS.iOS,
         targetArchitecture: Architecture.x64,
         iOSSdk: IOSSdk.iPhoneOS,
@@ -121,7 +120,7 @@ void main() {
 
   test('reports a missing selected prebuilt', () {
     expect(
-      () => resolvePrebuiltNativeAsset(
+      () => build_hook.resolvePrebuiltNativeAsset(
         packageRoot: Uri.directory(
           '${Directory.systemTemp.path}/flutter_caesium_ffi_missing/',
         ),
