@@ -187,6 +187,8 @@ jobs:
       - name: Build Windows consumer without installing Rust
         run: flutter build windows --debug
         working-directory: example
+      - name: Initialize MSVC command-line tools
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Verify checked-in Windows Native Asset
         shell: pwsh
         run: |
