@@ -1,5 +1,7 @@
 # flutter_caesium_ffi
 
+English | [简体中文](README_zh-CN.md)
+
 [![pub package](https://img.shields.io/pub/v/flutter_caesium_ffi.svg)](https://pub.dev/packages/flutter_caesium_ffi)
 [![pub points](https://img.shields.io/pub/points/flutter_caesium_ffi)](https://pub.dev/packages/flutter_caesium_ffi/score)
 [![CI](https://github.com/zzzlazy/flutter_caesium_ffi/actions/workflows/ci.yml/badge.svg)](https://github.com/zzzlazy/flutter_caesium_ffi/actions/workflows/ci.yml)
@@ -11,14 +13,15 @@ one Dart API across Android, iOS, macOS, Windows, Linux, and web.
 
 Native platforms use
 [`libcaesium` 0.20.3](https://github.com/Lymphatus/libcaesium) through a stable
-C ABI and Dart FFI. Browsers use
+C ABI, Dart FFI, and Flutter Native Assets. Browsers use
 [`libcaesium-wasm` 0.5.0](https://github.com/zzzlazy/libcaesium-wasm).
 
 The package supports JPEG, PNG, WebP, GIF, and TIFF on Android, iOS, macOS,
 Windows, and Linux. Web supports in-memory JPEG, PNG, and WebP compression and
 conversion.
 Native libraries and web assets are bundled, so consuming applications do not
-need Rust, Cargo, npm, a C compiler, or manual script tags.
+need Rust, Cargo, npm, manual script tags, or a package-specific native source
+build.
 
 ## Features
 
@@ -27,8 +30,8 @@ need Rust, Cargo, npm, a C compiler, or manual script tags.
 - Image resize and format conversion with metadata controls
 - Best-effort target file size compression
 - Memory and file path APIs running outside the Flutter UI isolate
-- Bundled native binaries and WebAssembly: no consumer-side toolchain setup
-- One plugin for Flutter mobile, desktop, and web
+- Bundled native binaries and WebAssembly: no consumer-side Rust/Cargo setup
+- One package for Flutter mobile, desktop, and web
 
 > **License notice:** this package and its bundled native code are licensed
 > under AGPL-3.0-or-later. Applications that distribute or provide network
@@ -38,8 +41,8 @@ need Rust, Cargo, npm, a C compiler, or manual script tags.
 
 ## Requirements
 
-- Flutter 3.22 or newer
-- Dart 3.4 or newer
+- Flutter 3.38.10 or newer
+- Dart 3.10 or newer
 - A browser with WebAssembly and JavaScript module support
 - Android 5.0 / API 21 or newer
 - iOS 12.0 or newer
@@ -59,7 +62,7 @@ Or add it manually:
 
 ```yaml
 dependencies:
-  flutter_caesium_ffi: ^1.0.1
+  flutter_caesium_ffi: ^2.0.0
 ```
 
 To track unreleased changes from the default branch instead:
@@ -72,9 +75,11 @@ dependencies:
       ref: main
 ```
 
-Then run `flutter pub get` and build the application normally. Native binaries
-and the WebAssembly module are already bundled. Rust is only needed when
-modifying or rebuilding the wrappers.
+Then run `flutter pub get` and build the application normally. The Native
+Assets hook selects and bundles the matching precompiled library without
+network access. Rust is only needed when modifying or rebuilding the native
+wrapper. Applications still need Flutter's normal target-platform build
+environment, such as Xcode or the Android SDK/NDK.
 
 ## Usage
 
@@ -135,7 +140,7 @@ candidate when the exact target cannot be reached.
 | --- | --- |
 | Android | `arm64-v8a`, `armeabi-v7a`, `x86_64` |
 | iOS | arm64 device; arm64/x86_64 simulator |
-| macOS | arm64/x86_64 universal |
+| macOS | arm64, x86_64 |
 | Windows | x64 MSVC |
 | Linux | x86_64, glibc 2.31+ |
 | Web | WebAssembly, JPEG/PNG/WebP |
@@ -143,7 +148,8 @@ candidate when the exact target cannot be reached.
 ## Building native libraries
 
 End users do not need these steps. Contributors need Rust 1.92.0 plus the
-platform SDK:
+platform SDK. These commands regenerate the precompiled dynamic libraries that
+the Native Assets hook selects; the hook never invokes Cargo:
 
 ```sh
 dart run tool/build_native.dart --platform macos
@@ -173,10 +179,10 @@ separate native workflow only runs when Rust, C ABI, bindings, native packaging,
 or prebuilt-binary files change. Version tags and manual dispatches always run
 the complete native workflow.
 
-The native workflow builds and strips each platform binary, verifies example
-application linking from the checked-in binaries before rebuilding them,
-combines a complete package artifact, and runs `dart pub publish --dry-run`.
-It does not publish to pub.dev. Checksums for the checked-in binaries are in
+The native workflow builds each platform binary, verifies example application
+linking from the checked-in binaries before rebuilding them, combines a
+complete package artifact, and runs `dart pub publish --dry-run`. It does not
+publish to pub.dev. Checksums for the checked-in binaries are in
 [`NATIVE_CHECKSUMS.sha256`](NATIVE_CHECKSUMS.sha256).
 
 ## Development
@@ -189,11 +195,10 @@ flutter build web --release
 cargo +1.92.0 test --manifest-path rust/Cargo.toml
 ```
 
-To run native integration tests against a local library:
+To run the Native Assets integration tests:
 
 ```sh
-FLUTTER_CAESIUM_FFI_LIBRARY=/absolute/path/to/libflutter_caesium_ffi.dylib \
-  flutter test test/native_integration_test.dart
+flutter test test/native_integration_test.dart
 ```
 
 See the runnable app in [`example`](example).

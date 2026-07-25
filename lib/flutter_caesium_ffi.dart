@@ -1,5 +1,3 @@
-library flutter_caesium_ffi;
-
 import 'dart:typed_data';
 
 import 'src/models.dart';

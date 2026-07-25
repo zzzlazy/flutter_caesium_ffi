@@ -14,9 +14,11 @@ Future<void> main(List<String> arguments) async {
   final List<String> platforms = switch (requested) {
     'host' => <String>[_hostPlatform()],
     'all-apple' => <String>['macos', 'ios'],
-    'macos' || 'ios' || 'android' || 'linux' || 'windows' => <String>[
-        requested
-      ],
+    'macos' ||
+    'ios' ||
+    'android' ||
+    'linux' ||
+    'windows' => <String>[requested],
     _ => throw ArgumentError.value(requested, '--platform'),
   };
 
@@ -58,125 +60,63 @@ String _hostPlatform() {
 }
 
 Future<void> _buildMacos(Directory root) async {
-  const List<String> targets = <String>[
-    'aarch64-apple-darwin',
-    'x86_64-apple-darwin',
-  ];
-  for (final String target in targets) {
+  const Map<String, String> targets = <String, String>{
+    'aarch64-apple-darwin': 'arm64',
+    'x86_64-apple-darwin': 'x64',
+  };
+  for (final MapEntry<String, String> target in targets.entries) {
     await _cargoBuild(
       root,
-      target,
-      environment: const <String, String>{
-        'MACOSX_DEPLOYMENT_TARGET': '10.14',
-      },
+      target.key,
+      environment: const <String, String>{'MACOSX_DEPLOYMENT_TARGET': '10.14'},
     );
-  }
-
-  final Directory temporary =
-      await Directory.systemTemp.createTemp('flutter_caesium_macos_');
-  try {
-    final String universal = _join(temporary.path, 'lib$_libraryBase.a');
-    final String headers = await _copyPublicHeaders(root, temporary);
-    await _run('lipo', <String>[
-      '-create',
-      _rustLibrary(root, targets[0]),
-      _rustLibrary(root, targets[1]),
-      '-output',
-      universal,
-    ]);
-    final String output = _join(
-      root.path,
-      'macos',
-      'Frameworks',
-      '$_libraryBase.xcframework',
+    await _copyAppleDynamicLibrary(
+      root,
+      rustTarget: target.key,
+      platform: 'macos',
+      destinationTarget: target.value,
     );
-    await _replaceDirectory(output);
-    await _run('xcodebuild', <String>[
-      '-create-xcframework',
-      '-library',
-      universal,
-      '-headers',
-      headers,
-      '-output',
-      output,
-    ]);
-  } finally {
-    await temporary.delete(recursive: true);
   }
 }
 
 Future<void> _buildIos(Directory root) async {
-  const String deviceTarget = 'aarch64-apple-ios';
-  const List<String> simulatorTargets = <String>[
-    'aarch64-apple-ios-sim',
-    'x86_64-apple-ios',
-  ];
+  const Map<String, String> targets = <String, String>{
+    'aarch64-apple-ios': 'arm64',
+    'aarch64-apple-ios-sim': 'arm64-simulator',
+    'x86_64-apple-ios': 'x64-simulator',
+  };
   const Map<String, String> environment = <String, String>{
     'IPHONEOS_DEPLOYMENT_TARGET': '12.0',
   };
-  await _cargoBuild(root, deviceTarget, environment: environment);
-  for (final String target in simulatorTargets) {
-    await _cargoBuild(root, target, environment: environment);
-  }
-
-  final Directory temporary =
-      await Directory.systemTemp.createTemp('flutter_caesium_ios_');
-  try {
-    final String simulator = _join(temporary.path, 'lib$_libraryBase.a');
-    final String headers = await _copyPublicHeaders(root, temporary);
-    await _run('lipo', <String>[
-      '-create',
-      _rustLibrary(root, simulatorTargets[0]),
-      _rustLibrary(root, simulatorTargets[1]),
-      '-output',
-      simulator,
-    ]);
-    final String output = _join(
-      root.path,
-      'ios',
-      'Frameworks',
-      '$_libraryBase.xcframework',
+  for (final MapEntry<String, String> target in targets.entries) {
+    await _cargoBuild(root, target.key, environment: environment);
+    await _copyAppleDynamicLibrary(
+      root,
+      rustTarget: target.key,
+      platform: 'ios',
+      destinationTarget: target.value,
     );
-    await _replaceDirectory(output);
-    await _run('xcodebuild', <String>[
-      '-create-xcframework',
-      '-library',
-      _rustLibrary(root, deviceTarget),
-      '-headers',
-      headers,
-      '-library',
-      simulator,
-      '-headers',
-      headers,
-      '-output',
-      output,
-    ]);
-  } finally {
-    await temporary.delete(recursive: true);
   }
 }
 
 Future<void> _buildAndroid(Directory root) async {
   final String output = _join(root.path, 'native', 'android');
-  await _run(
-      'cargo',
-      <String>[
-        '+1.92.0',
-        'ndk',
-        '-p',
-        '21',
-        '-t',
-        'arm64-v8a',
-        '-t',
-        'armeabi-v7a',
-        '-t',
-        'x86_64',
-        '-o',
-        output,
-        'build',
-        '--release',
-      ],
-      workingDirectory: _join(root.path, 'rust'));
+  await _run('cargo', <String>[
+    '+1.92.0',
+    'ndk',
+    '-p',
+    '21',
+    '-t',
+    'arm64-v8a',
+    '-t',
+    'armeabi-v7a',
+    '-t',
+    'x86_64',
+    '-o',
+    output,
+    'build',
+    '--release',
+  ], workingDirectory: _join(root.path, 'rust'));
 }
 
 Future<void> _buildLinux(Directory root) async {
@@ -206,8 +146,8 @@ Future<void> _buildLinux(Directory root) async {
         // dispatch implementations from the glibc-baseline build.
         'CFLAGS_x86_64_unknown_linux_gnu':
             '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_VPCLMULQDQ '
-                '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_AVX512VNNI '
-                '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_AVX_VNNI',
+            '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_AVX512VNNI '
+            '-DLIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_AVX_VNNI',
       },
     );
   }
@@ -251,49 +191,45 @@ Future<void> _cargoBuild(
   String target, {
   Map<String, String>? environment,
 }) {
-  return _run(
-    'cargo',
-    <String>[
-      '+1.92.0',
-      'build',
-      '--release',
-      '--manifest-path',
-      _join(root.path, 'rust', 'Cargo.toml'),
-      '--target',
-      target,
-    ],
-    environment: environment,
-  );
+  return _run('cargo', <String>[
+    '+1.92.0',
+    'build',
+    '--release',
+    '--manifest-path',
+    _join(root.path, 'rust', 'Cargo.toml'),
+    '--target',
+    target,
+  ], environment: environment);
 }
 
-String _rustLibrary(Directory root, String target) {
-  return _join(
+Future<void> _copyAppleDynamicLibrary(
+  Directory root, {
+  required String rustTarget,
+  required String platform,
+  required String destinationTarget,
+}) async {
+  final String source = _join(
     root.path,
     'rust',
     'target',
-    target,
+    rustTarget,
     'release',
-    'lib$_libraryBase.a',
+    'lib$_libraryBase.dylib',
   );
-}
-
-Future<void> _replaceDirectory(String path) async {
-  final Directory directory = Directory(path);
-  if (directory.existsSync()) {
-    await directory.delete(recursive: true);
-  }
-}
-
-Future<String> _copyPublicHeaders(
-  Directory root,
-  Directory temporary,
-) async {
-  final Directory headers = Directory(_join(temporary.path, 'Headers'));
-  await headers.create();
-  await File(_join(root.path, 'src', 'flutter_caesium_ffi.h')).copy(
-    _join(headers.path, 'flutter_caesium_ffi.h'),
+  final String destination = _join(
+    root.path,
+    'native',
+    platform,
+    destinationTarget,
+    'lib$_libraryBase.dylib',
   );
-  return headers.path;
+  await File(destination).parent.create(recursive: true);
+  await File(source).copy(destination);
+  await _run('install_name_tool', <String>[
+    '-id',
+    '@rpath/lib$_libraryBase.dylib',
+    destination,
+  ]);
 }
 
 Future<void> _run(
@@ -313,23 +249,30 @@ Future<void> _run(
   final int result = await process.exitCode;
   if (result != 0) {
     throw ProcessException(
-        executable, arguments, 'Native build failed.', result);
+      executable,
+      arguments,
+      'Native build failed.',
+      result,
+    );
   }
 }
 
-String _join(String first, String second,
-    [String? third,
-    String? fourth,
-    String? fifth,
-    String? sixth,
-    String? seventh]) {
+String _join(
+  String first,
+  String second, [
+  String? third,
+  String? fourth,
+  String? fifth,
+  String? sixth,
+  String? seventh,
+]) {
   return <String>[
     first,
     second,
-    if (third != null) third,
-    if (fourth != null) fourth,
-    if (fifth != null) fifth,
-    if (sixth != null) sixth,
-    if (seventh != null) seventh,
+    ?third,
+    ?fourth,
+    ?fifth,
+    ?sixth,
+    ?seventh,
   ].join(Platform.pathSeparator);
 }

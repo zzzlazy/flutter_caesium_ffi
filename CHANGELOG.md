@@ -1,5 +1,17 @@
 ## Unreleased
 
+## 2.0.0
+
+- **Breaking:** Raised the minimum versions to Flutter 3.38.10 and Dart 3.10.
+- Replaced platform-specific FFI plugin packaging with a Native Assets build
+  hook and `@Native` bindings.
+- Kept all native libraries precompiled and bundled so consuming applications
+  do not need Rust, Cargo, package-specific source builds, or package-initiated
+  build-time downloads.
+- Replaced Apple static XCFrameworks with target-specific dynamic libraries.
+- Preserved the existing public Dart API, native C ABI, supported
+  architectures, and WebAssembly implementation.
+- Added a Simplified Chinese README.
 - Improved package description, topics, installation guidance, and
   discoverability metadata.
 

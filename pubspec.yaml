@@ -1,6 +1,6 @@
 name: flutter_caesium_ffi
 description: Fast, high-quality image compression, resize, conversion, and target-size optimization for Flutter mobile, desktop, and web, powered by libcaesium.
-version: 1.0.1
+version: 2.0.0
 homepage: https://github.com/zzzlazy/flutter_caesium_ffi
 repository: https://github.com/zzzlazy/flutter_caesium_ffi
 issue_tracker: https://github.com/zzzlazy/flutter_caesium_ffi/issues
@@ -12,38 +12,30 @@ topics:
   - wasm
 
 environment:
-  sdk: '>=3.4.0 <4.0.0'
-  flutter: '>=3.22.0'
+  sdk: '>=3.10.0 <4.0.0'
+  flutter: '>=3.38.10'
 
 dependencies:
-  ffi: ^2.1.2
+  code_assets: ^1.0.0
+  ffi: ^2.1.4
   flutter:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
+  hooks: ^1.0.0
 
 dev_dependencies:
-  ffigen: ^11.0.0
-  flutter_lints: ^3.0.0
+  ffigen: ^20.1.1
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
 
 flutter:
   plugin:
     platforms:
-      android:
-        ffiPlugin: true
-      ios:
-        ffiPlugin: true
-      linux:
-        ffiPlugin: true
-      macos:
-        ffiPlugin: true
       web:
         pluginClass: FlutterCaesiumFfiWeb
         fileName: src/flutter_caesium_ffi_web.dart
-      windows:
-        ffiPlugin: true
   assets:
     - web/libcaesium_wasm/index.js
     - web/libcaesium_wasm/libcaesium_wasm.wasm

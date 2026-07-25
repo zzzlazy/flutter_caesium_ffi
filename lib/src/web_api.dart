@@ -59,13 +59,16 @@ Future<CaesiumMemoryResult> runMemoryOperation(
   final _CompressionResult result = switch (operation) {
     NativeOperation.compress => module.compress(inputCopy.toJS, webOptions),
     NativeOperation.compressToSize => module.compressToSize(
-        inputCopy.toJS,
-        maxOutputBytes!,
-        webOptions,
-        returnSmallest,
-      ),
-    NativeOperation.convert =>
-      module.convert(inputCopy.toJS, format!.nativeValue, webOptions),
+      inputCopy.toJS,
+      maxOutputBytes!,
+      webOptions,
+      returnSmallest,
+    ),
+    NativeOperation.convert => module.convert(
+      inputCopy.toJS,
+      format!.nativeValue,
+      webOptions,
+    ),
   };
 
   if (!result.status) {
@@ -108,17 +111,20 @@ void _validateWebOptions(CaesiumOptions options) {
 }
 
 bool _isGifOrTiff(Uint8List input) {
-  final bool gif = input.length >= 4 &&
+  final bool gif =
+      input.length >= 4 &&
       input[0] == 0x47 &&
       input[1] == 0x49 &&
       input[2] == 0x46 &&
       input[3] == 0x38;
-  final bool littleEndianTiff = input.length >= 4 &&
+  final bool littleEndianTiff =
+      input.length >= 4 &&
       input[0] == 0x49 &&
       input[1] == 0x49 &&
       input[2] == 0x2a &&
       input[3] == 0x00;
-  final bool bigEndianTiff = input.length >= 4 &&
+  final bool bigEndianTiff =
+      input.length >= 4 &&
       input[0] == 0x4d &&
       input[1] == 0x4d &&
       input[2] == 0x00 &&
@@ -157,21 +163,8 @@ Future<_CaesiumModule> _loadModule() async {
   return module;
 }
 
-JSPromise<JSObject> _importModule(String moduleUrl) {
-  try {
-    return Function.apply(
-      importModule,
-      <Object?>[moduleUrl.toJS],
-    ) as JSPromise<JSObject>;
-  } on TypeError {
-    // Dart 3.4's importModule accepts a Dart String, while current Dart SDKs
-    // accept a JSAny module specifier.
-    return Function.apply(
-      importModule,
-      <Object?>[moduleUrl],
-    ) as JSPromise<JSObject>;
-  }
-}
+JSPromise<JSObject> _importModule(String moduleUrl) =>
+    importModule(moduleUrl.toJS);
 
 _CompressionOptions _toWebOptions(CaesiumOptions options) {
   return _CompressionOptions(
@@ -276,10 +269,7 @@ extension type _PngOptions._(JSObject _) implements JSObject {
 @JS()
 @anonymous
 extension type _WebpOptions._(JSObject _) implements JSObject {
-  external factory _WebpOptions({
-    required int quality,
-    required bool lossless,
-  });
+  external factory _WebpOptions({required int quality, required bool lossless});
 }
 
 @JS()

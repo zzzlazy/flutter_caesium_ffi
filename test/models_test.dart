@@ -11,30 +11,22 @@ void main() {
 
     test('rejects invalid quality values', () {
       expect(
-        () => const CaesiumOptions(
-          jpeg: JpegOptions(quality: 101),
-        ).validate(),
+        () => const CaesiumOptions(jpeg: JpegOptions(quality: 101)).validate(),
         throwsRangeError,
       );
       expect(
-        () => const CaesiumOptions(
-          gif: GifOptions(quality: 0),
-        ).validate(),
+        () => const CaesiumOptions(gif: GifOptions(quality: 0)).validate(),
         throwsRangeError,
       );
     });
 
     test('validates resize dimensions', () {
       expect(
-        () => const CaesiumOptions(
-          resize: ResizeOptions(),
-        ).validate(),
+        () => const CaesiumOptions(resize: ResizeOptions()).validate(),
         throwsArgumentError,
       );
       expect(
-        () => const CaesiumOptions(
-          resize: ResizeOptions(width: 0),
-        ).validate(),
+        () => const CaesiumOptions(resize: ResizeOptions(width: 0)).validate(),
         throwsRangeError,
       );
       expect(
@@ -43,9 +35,7 @@ void main() {
         ).validate(),
         throwsRangeError,
       );
-      const CaesiumOptions(
-        resize: ResizeOptions(width: 1920),
-      ).validate();
+      const CaesiumOptions(resize: ResizeOptions(width: 1920)).validate();
     });
   });
 
@@ -71,8 +61,10 @@ void main() {
   });
 
   test('native enums have stable ABI values', () {
-    expect(CaesiumFormat.values.map((CaesiumFormat value) => value.nativeValue),
-        <int>[0, 1, 2, 3, 4]);
+    expect(
+      CaesiumFormat.values.map((CaesiumFormat value) => value.nativeValue),
+      <int>[0, 1, 2, 3, 4],
+    );
     expect(JpegChromaSubsampling.cs420.nativeValue, 420);
     expect(TiffCompression.deflate.nativeValue, 2);
     expect(TiffDeflateLevel.balanced.nativeValue, 6);

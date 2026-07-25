@@ -8,6 +8,6 @@ flutter run
 flutter run -d chrome
 ```
 
-The parent package contains the native libraries and WebAssembly assets.
-Contributors can rebuild native code with
+The parent package uses Native Assets to bundle the matching precompiled native
+library and contains the WebAssembly assets. Contributors can rebuild native code with
 `dart run tool/build_native.dart --platform host`.

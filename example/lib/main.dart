@@ -32,16 +32,14 @@ class _ExampleAppState extends State<ExampleApp> {
       final Uint8List input = base64Decode(_samplePng);
       final CaesiumMemoryResult result = await FlutterCaesiumFfi.compress(
         input,
-        options: const CaesiumOptions(
-          png: PngOptions(optimize: true),
-        ),
+        options: const CaesiumOptions(png: PngOptions(optimize: true)),
       );
       final CaesiumMemoryResult targeted =
           await FlutterCaesiumFfi.compressToSize(
-        input,
-        maxOutputBytes: 128,
-        returnSmallest: true,
-      );
+            input,
+            maxOutputBytes: 128,
+            returnSmallest: true,
+          );
       final CaesiumMemoryResult converted = await FlutterCaesiumFfi.convert(
         input,
         format: CaesiumFormat.webp,
@@ -50,7 +48,8 @@ class _ExampleAppState extends State<ExampleApp> {
         throw StateError('Conversion did not produce a WebP image.');
       }
       setState(() {
-        _status = '${FlutterCaesiumFfi.nativeVersion}\n'
+        _status =
+            '${FlutterCaesiumFfi.nativeVersion}\n'
             'compress: ${result.inputSize} → ${result.outputSize} bytes\n'
             'target-size: ${targeted.outputSize} bytes\n'
             'convert to WebP: ${converted.outputSize} bytes';
