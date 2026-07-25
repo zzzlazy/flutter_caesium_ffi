@@ -137,12 +137,7 @@ final class PngOptions {
   void validate() {
     _validateQuality('png.quality', quality);
     if (optimizationLevel < 0 || optimizationLevel > 6) {
-      throw RangeError.range(
-        optimizationLevel,
-        0,
-        6,
-        'png.optimizationLevel',
-      );
+      throw RangeError.range(optimizationLevel, 0, 6, 'png.optimizationLevel');
     }
   }
 }
@@ -212,20 +207,10 @@ final class ResizeOptions {
       );
     }
     if (width != null && (width! <= 0 || width! > 0xffffffff)) {
-      throw RangeError.range(
-        width!,
-        1,
-        0xffffffff,
-        'resize.width',
-      );
+      throw RangeError.range(width!, 1, 0xffffffff, 'resize.width');
     }
     if (height != null && (height! <= 0 || height! > 0xffffffff)) {
-      throw RangeError.range(
-        height!,
-        1,
-        0xffffffff,
-        'resize.height',
-      );
+      throw RangeError.range(height!, 1, 0xffffffff, 'resize.height');
     }
   }
 }

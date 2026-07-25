@@ -28,8 +28,9 @@ Future<CaesiumMemoryResult> runMemoryOperation(
     throw ArgumentError.value(input, 'input', 'Must not be empty.');
   }
   _validateOperation(operation, format, maxOutputBytes);
-  final TransferableTypedData transferable =
-      TransferableTypedData.fromList(<Uint8List>[input]);
+  final TransferableTypedData transferable = TransferableTypedData.fromList(
+    <Uint8List>[input],
+  );
   final _MemoryPayload payload = await Isolate.run<_MemoryPayload>(() {
     final Uint8List materialized = transferable.materialize().asUint8List();
     final Uint8List output = _NativeApi.instance.runMemory(
@@ -148,8 +149,8 @@ final class _MemoryPayload {
 }
 
 final class _NativeApi {
-  _NativeApi._() : bindings = FlutterCaesiumFfiBindings(_openLibrary()) {
-    final int actual = bindings.fc_abi_version();
+  _NativeApi._() {
+    final int actual = fc_abi_version();
     if (actual != _expectedAbiVersion) {
       throw StateError(
         'flutter_caesium_ffi ABI mismatch: expected '
@@ -160,10 +161,7 @@ final class _NativeApi {
 
   static final _NativeApi instance = _NativeApi._();
 
-  final FlutterCaesiumFfiBindings bindings;
-
-  String get nativeVersion =>
-      bindings.fc_native_version().cast<Utf8>().toDartString();
+  String get nativeVersion => fc_native_version().cast<Utf8>().toDartString();
 
   Uint8List runMemory(
     NativeOperation operation,
@@ -182,30 +180,30 @@ final class _NativeApi {
 
     try {
       final int code = switch (operation) {
-        NativeOperation.compress => bindings.fc_compress_memory(
-            inputPointer,
-            input.length,
-            optionsPointer,
-            outputPointer,
-            errorPointer,
-          ),
-        NativeOperation.compressToSize => bindings.fc_compress_to_size_memory(
-            inputPointer,
-            input.length,
-            maxOutputBytes!,
-            returnSmallest ? 1 : 0,
-            optionsPointer,
-            outputPointer,
-            errorPointer,
-          ),
-        NativeOperation.convert => bindings.fc_convert_memory(
-            inputPointer,
-            input.length,
-            format!.nativeValue,
-            optionsPointer,
-            outputPointer,
-            errorPointer,
-          ),
+        NativeOperation.compress => fc_compress_memory(
+          inputPointer,
+          input.length,
+          optionsPointer,
+          outputPointer,
+          errorPointer,
+        ),
+        NativeOperation.compressToSize => fc_compress_to_size_memory(
+          inputPointer,
+          input.length,
+          maxOutputBytes!,
+          returnSmallest ? 1 : 0,
+          optionsPointer,
+          outputPointer,
+          errorPointer,
+        ),
+        NativeOperation.convert => fc_convert_memory(
+          inputPointer,
+          input.length,
+          format!.nativeValue,
+          optionsPointer,
+          outputPointer,
+          errorPointer,
+        ),
       };
       _throwIfFailed(code, errorPointer);
       final FcBuffer output = outputPointer.ref;
@@ -218,7 +216,7 @@ final class _NativeApi {
       return Uint8List.fromList(output.data.asTypedList(output.length));
     } finally {
       _freeError(errorPointer);
-      bindings.fc_buffer_free(outputPointer);
+      fc_buffer_free(outputPointer);
       calloc
         ..free(inputPointer)
         ..free(optionsPointer)
@@ -244,27 +242,27 @@ final class _NativeApi {
 
     try {
       final int code = switch (operation) {
-        NativeOperation.compress => bindings.fc_compress_file(
-            inputPointer.cast(),
-            outputPointer.cast(),
-            optionsPointer,
-            errorPointer,
-          ),
-        NativeOperation.compressToSize => bindings.fc_compress_to_size_file(
-            inputPointer.cast(),
-            outputPointer.cast(),
-            maxOutputBytes!,
-            returnSmallest ? 1 : 0,
-            optionsPointer,
-            errorPointer,
-          ),
-        NativeOperation.convert => bindings.fc_convert_file(
-            inputPointer.cast(),
-            outputPointer.cast(),
-            format!.nativeValue,
-            optionsPointer,
-            errorPointer,
-          ),
+        NativeOperation.compress => fc_compress_file(
+          inputPointer.cast(),
+          outputPointer.cast(),
+          optionsPointer,
+          errorPointer,
+        ),
+        NativeOperation.compressToSize => fc_compress_to_size_file(
+          inputPointer.cast(),
+          outputPointer.cast(),
+          maxOutputBytes!,
+          returnSmallest ? 1 : 0,
+          optionsPointer,
+          errorPointer,
+        ),
+        NativeOperation.convert => fc_convert_file(
+          inputPointer.cast(),
+          outputPointer.cast(),
+          format!.nativeValue,
+          optionsPointer,
+          errorPointer,
+        ),
       };
       _throwIfFailed(code, errorPointer);
     } finally {
@@ -277,10 +275,7 @@ final class _NativeApi {
     }
   }
 
-  void _throwIfFailed(
-    int code,
-    Pointer<Pointer<Char>> errorPointer,
-  ) {
+  void _throwIfFailed(int code, Pointer<Pointer<Char>> errorPointer) {
     if (code == 0) {
       return;
     }
@@ -294,7 +289,7 @@ final class _NativeApi {
   void _freeError(Pointer<Pointer<Char>> errorPointer) {
     final Pointer<Char> message = errorPointer.value;
     if (message != nullptr) {
-      bindings.fc_string_free(message);
+      fc_string_free(message);
       errorPointer.value = nullptr;
     }
   }
@@ -319,40 +314,4 @@ void _writeOptions(FcOptions target, CaesiumOptions source) {
     ..tiff_deflate_level = source.tiff.deflateLevel.nativeValue
     ..width = source.resize?.width ?? 0
     ..height = source.resize?.height ?? 0;
-}
-
-DynamicLibrary _openLibrary() {
-  final String? override = Platform.environment['FLUTTER_CAESIUM_FFI_LIBRARY'];
-  if (override != null && override.isNotEmpty) {
-    return DynamicLibrary.open(override);
-  }
-  if (Platform.isIOS || Platform.isMacOS) {
-    final DynamicLibrary process = DynamicLibrary.process();
-    try {
-      process.lookup<NativeFunction<Uint32 Function()>>('fc_abi_version');
-      return process;
-    } on ArgumentError {
-      final List<String> candidates = <String>[
-        'flutter_caesium_ffi.framework/flutter_caesium_ffi',
-        'libflutter_caesium_ffi.dylib',
-      ];
-      for (final String candidate in candidates) {
-        try {
-          return DynamicLibrary.open(candidate);
-        } on ArgumentError {
-          continue;
-        }
-      }
-      rethrow;
-    }
-  }
-  if (Platform.isAndroid || Platform.isLinux) {
-    return DynamicLibrary.open('libflutter_caesium_ffi.so');
-  }
-  if (Platform.isWindows) {
-    return DynamicLibrary.open('flutter_caesium_ffi.dll');
-  }
-  throw UnsupportedError(
-    'flutter_caesium_ffi does not support ${Platform.operatingSystem}.',
-  );
 }

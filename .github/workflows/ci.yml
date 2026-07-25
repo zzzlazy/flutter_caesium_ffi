@@ -1,32 +1,41 @@
 name: CI
 
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-env:
-  FLUTTER_VERSION: 3.22.2
-
 jobs:
   quality:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - flutter-version: '3.38.10'
+            check-format: false
+          - flutter-version: '3.44.7'
+            check-format: true
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ matrix.flutter-version }}
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed lib test tool example/lib
+      - run: dart format --output=none --set-exit-if-changed lib test hook tool example/lib
+        if: matrix.check-format
       - run: flutter analyze
-      - run: flutter test test/models_test.dart
+      - run: flutter test test/models_test.dart test/native_asset_hook_test.dart
       - run: flutter test --platform chrome test/web_validation_test.dart
       - run: flutter build web --release
         working-directory: example
       - name: Verify bundled WebAssembly assets
         run: sha256sum -c WEB_CHECKSUMS.sha256
-      - name: Verify bundled native binaries
+      - name: Verify bundled Native Assets
         run: sha256sum -c NATIVE_CHECKSUMS.sha256
