@@ -1,6 +1,6 @@
 name: flutter_caesium_ffi
 description: Fast, high-quality image compression, resize, conversion, and target-size optimization for Flutter mobile, desktop, and web, powered by libcaesium.
-version: 2.0.1
+version: 2.0.2
 homepage: https://github.com/zzzlazy/flutter_caesium_ffi
 repository: https://github.com/zzzlazy/flutter_caesium_ffi
 issue_tracker: https://github.com/zzzlazy/flutter_caesium_ffi/issues
@@ -10,6 +10,14 @@ topics:
   - compression
   - ffi
   - wasm
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
 
 environment:
   sdk: '>=3.10.0 <4.0.0'

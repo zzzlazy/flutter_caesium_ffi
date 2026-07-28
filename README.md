@@ -62,7 +62,7 @@ Or add it manually:
 
 ```yaml
 dependencies:
-  flutter_caesium_ffi: ^2.0.1
+  flutter_caesium_ffi: ^2.0.2
 ```
 
 To track unreleased changes from the default branch instead:

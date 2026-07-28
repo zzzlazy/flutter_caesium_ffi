@@ -1,5 +1,10 @@
 ## Unreleased
 
+## 2.0.2
+
+- Explicitly declared Android, iOS, Linux, macOS, web, and Windows support so
+  pub.dev displays all six supported Flutter platforms.
+
 ## 2.0.1
 
 - Updated `code_assets` and the `hooks` compatibility range to their latest
